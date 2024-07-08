@@ -87,7 +87,22 @@ namespace out_of_office.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.Email);
+            if (model == null)
+            {
+                return BadRequest("Model cannot be null.");
+            }
+
+            if (string.IsNullOrEmpty(model.Email))
+            {
+                return BadRequest("Email cannot be null or empty.");
+            }
+
+            if (string.IsNullOrEmpty(model.Password))
+            {
+                return BadRequest("Password cannot be null or empty.");
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 var userRoles = await _userManager.GetRolesAsync(user);
@@ -103,7 +118,12 @@ namespace out_of_office.Controllers
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
 
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+                var secretKey = _configuration["JWT:Secret"];
+                if (string.IsNullOrEmpty(secretKey))
+                {
+                    throw new InvalidOperationException("JWT Secret Key is not configured.");
+                }
+                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
                 var token = new JwtSecurityToken(
                     issuer: _configuration["JWT:ValidIssuer"],
@@ -168,4 +188,3 @@ namespace out_of_office.Controllers
         public const string Administrator = "Administrator";
     }
 }
-
