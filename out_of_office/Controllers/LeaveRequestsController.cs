@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using out_of_office.Data;
@@ -6,10 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace out_of_office.Controllers;
-
-[Route("api/[controller]")]
+namespace out_of_office.Controllers
+{
+    [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = RoleModel.Employee + "," + RoleModel.HRManager + "," + RoleModel.ProjectManager)]
     public class LeaveRequestsController : ControllerBase
     {
         private readonly OutOfOfficeContext _context;
@@ -20,12 +22,14 @@ namespace out_of_office.Controllers;
         }
 
         [HttpGet]
+        [Authorize(Roles = RoleModel.HRManager + "," + RoleModel.ProjectManager)]
         public async Task<ActionResult<IEnumerable<LeaveRequest>>> GetLeaveRequests()
         {
             return await _context.LeaveRequests.ToListAsync();
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = RoleModel.HRManager + "," + RoleModel.ProjectManager)]
         public async Task<ActionResult<LeaveRequest>> GetLeaveRequest(int id)
         {
             var leaveRequest = await _context.LeaveRequests.FindAsync(id);
@@ -39,6 +43,7 @@ namespace out_of_office.Controllers;
         }
 
         [HttpPost]
+        [Authorize(Roles = RoleModel.Employee)]
         public async Task<ActionResult<LeaveRequest>> PostLeaveRequest(LeaveRequest leaveRequest)
         {
             _context.LeaveRequests.Add(leaveRequest);
@@ -48,6 +53,7 @@ namespace out_of_office.Controllers;
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = RoleModel.HRManager + "," + RoleModel.ProjectManager)]
         public async Task<IActionResult> PutLeaveRequest(int id, LeaveRequest leaveRequest)
         {
             if (id != leaveRequest.ID)
@@ -77,6 +83,7 @@ namespace out_of_office.Controllers;
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = RoleModel.HRManager + "," + RoleModel.ProjectManager)]
         public async Task<IActionResult> DeleteLeaveRequest(int id)
         {
             var leaveRequest = await _context.LeaveRequests.FindAsync(id);
@@ -96,3 +103,4 @@ namespace out_of_office.Controllers;
             return _context.LeaveRequests.Any(e => e.ID == id);
         }
     }
+}

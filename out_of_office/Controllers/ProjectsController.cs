@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using out_of_office.Data;
@@ -6,10 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace out_of_office.Controllers;
-
-[Route("api/[controller]")]
+namespace out_of_office.Controllers
+{
+    [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = RoleModel.ProjectManager + "," + RoleModel.Administrator)]
     public class ProjectsController : ControllerBase
     {
         private readonly OutOfOfficeContext _context;
@@ -96,3 +98,4 @@ namespace out_of_office.Controllers;
             return _context.Projects.Any(e => e.ID == id);
         }
     }
+}
