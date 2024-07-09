@@ -22,9 +22,26 @@ namespace out_of_office.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ApprovalRequest>>> GetApprovalRequests()
+        public async Task<ActionResult<IEnumerable<ApprovalRequest>>> GetApprovalRequests(
+            string sortBy = "Status",
+            string sortOrder = "asc")
         {
-            return await _context.ApprovalRequests.ToListAsync();
+            var approvalRequests = _context.ApprovalRequests.AsQueryable();
+
+            // Apply sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                if (sortOrder.ToLower() == "desc")
+                {
+                    approvalRequests = approvalRequests.OrderByDescending(ar => EF.Property<object>(ar, sortBy));
+                }
+                else
+                {
+                    approvalRequests = approvalRequests.OrderBy(ar => EF.Property<object>(ar, sortBy));
+                }
+            }
+
+            return await approvalRequests.ToListAsync();
         }
 
         [HttpGet("{id}")]

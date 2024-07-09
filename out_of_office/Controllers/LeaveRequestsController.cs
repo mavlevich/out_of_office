@@ -22,10 +22,26 @@ namespace out_of_office.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = RoleModel.HRManager + "," + RoleModel.ProjectManager)]
-        public async Task<ActionResult<IEnumerable<LeaveRequest>>> GetLeaveRequests()
+        public async Task<ActionResult<IEnumerable<LeaveRequest>>> GetLeaveRequests(
+            string sortBy = "Status",
+            string sortOrder = "asc")
         {
-            return await _context.LeaveRequests.ToListAsync();
+            var leaveRequests = _context.LeaveRequests.AsQueryable();
+
+            // Apply sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                if (sortOrder.ToLower() == "desc")
+                {
+                    leaveRequests = leaveRequests.OrderByDescending(lr => EF.Property<object>(lr, sortBy));
+                }
+                else
+                {
+                    leaveRequests = leaveRequests.OrderBy(lr => EF.Property<object>(lr, sortBy));
+                }
+            }
+
+            return await leaveRequests.ToListAsync();
         }
 
         [HttpGet("{id}")]

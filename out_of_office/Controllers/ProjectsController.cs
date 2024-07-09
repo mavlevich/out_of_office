@@ -22,9 +22,26 @@ namespace out_of_office.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
+        public async Task<ActionResult<IEnumerable<Project>>> GetProjects(
+            string sortBy = "ID",
+            string sortOrder = "asc")
         {
-            return await _context.Projects.ToListAsync();
+            var projects = _context.Projects.AsQueryable();
+
+            // Apply sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                if (sortOrder.ToLower() == "desc")
+                {
+                    projects = projects.OrderByDescending(p => EF.Property<object>(p, sortBy));
+                }
+                else
+                {
+                    projects = projects.OrderBy(p => EF.Property<object>(p, sortBy));
+                }
+            }
+
+            return await projects.ToListAsync();
         }
 
         [HttpGet("{id}")]

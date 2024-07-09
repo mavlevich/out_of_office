@@ -22,9 +22,26 @@ namespace out_of_office.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees(
+            string sortBy = "Full Name",
+            string sortOrder = "asc")
         {
-            return await _context.Employees.ToListAsync();
+            var employees = _context.Employees.AsQueryable();
+
+            // Apply sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                if (sortOrder.ToLower() == "desc")
+                {
+                    employees = employees.OrderByDescending(e => EF.Property<object>(e, sortBy));
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => EF.Property<object>(e, sortBy));
+                }
+            }
+
+            return await employees.ToListAsync();
         }
 
         [HttpGet("{id}")]
