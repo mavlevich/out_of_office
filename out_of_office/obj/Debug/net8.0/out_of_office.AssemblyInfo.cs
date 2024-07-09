@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("out_of_office")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0e6a2a1aeb3f1fb504283a4715659fa6a9cc665c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+217e0fd62e8ca1493ee56b34dd018ac0139667be")]
 [assembly: System.Reflection.AssemblyProductAttribute("out_of_office")]
 [assembly: System.Reflection.AssemblyTitleAttribute("out_of_office")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

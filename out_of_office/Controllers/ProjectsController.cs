@@ -11,7 +11,7 @@ namespace out_of_office.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = RoleModel.ProjectManager + "," + RoleModel.Administrator)]
+    // [Authorize(Roles = RoleModel.ProjectManager + "," + RoleModel.Administrator)]
     public class ProjectsController : ControllerBase
     {
         private readonly OutOfOfficeContext _context;

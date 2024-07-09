@@ -87,51 +87,27 @@ namespace out_of_office.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            if (model == null)
-            {
-                return BadRequest("Model cannot be null.");
-            }
-
-            if (string.IsNullOrEmpty(model.Email))
-            {
-                return BadRequest("Email cannot be null or empty.");
-            }
-
-            if (string.IsNullOrEmpty(model.Password))
-            {
-                return BadRequest("Password cannot be null or empty.");
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                var userRoles = await _userManager.GetRolesAsync(user);
-
-                var authClaims = new List<Claim>
+                var claims = new[]
                 {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
 
-                foreach (var userRole in userRoles)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-                }
-
-                var secretKey = _configuration["JWT:Secret"];
-                if (string.IsNullOrEmpty(secretKey))
-                {
-                    throw new InvalidOperationException("JWT Secret Key is not configured.");
-                }
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                 var token = new JwtSecurityToken(
-                    issuer: _configuration["JWT:ValidIssuer"],
-                    audience: _configuration["JWT:ValidAudience"],
-                    expires: DateTime.Now.AddHours(3),
-                    claims: authClaims,
-                    signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                );
+                    issuer: _configuration["Jwt:Issuer"],
+                    audience: _configuration["Jwt:Audience"],
+                    claims: claims,
+                    expires: DateTime.Now.AddMinutes(30),
+                    signingCredentials: creds);
 
                 return Ok(new
                 {
